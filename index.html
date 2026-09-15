@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>notify-bot — Telegram MCP</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #f0f2f5;
+            --text-primary: #0a1428;
+            --text-secondary: #495057;
+            --text-tertiary: #6c757d;
+            --border: #e9ecef;
+            --accent: #22c55e;
+            --accent-dark: #16a34a;
+            --accent-light: #dcfce7;
+            --info: #3b82f6;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --success: #10b981;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg-primary: #0f172a;
+                --bg-secondary: #1e293b;
+                --bg-tertiary: #334155;
+                --text-primary: #f1f5f9;
+                --text-secondary: #cbd5e1;
+                --text-tertiary: #94a3b8;
+                --border: #475569;
+                --accent: #22c55e;
+                --accent-dark: #16a34a;
+                --accent-light: #1e3a1f;
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --border: #475569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: var(--accent-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            position: sticky;
+            top: env(safe-area-inset-top, 0px);
+            background: var(--bg-primary);
+            z-index: 10;
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: "Space Mono", monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .logo span {
+            color: var(--text-primary);
+        }
+
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 200ms;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-family: "Space Mono", monospace;
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-badges {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--accent-light);
+            color: var(--accent-dark);
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.dark {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* Section */
+        .section {
+            padding: 60px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-family: "Space Mono", monospace;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 40px;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-card.status {
+            border-left: 4px solid var(--success);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-family: "Space Mono", monospace;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-detail {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Status Indicator */
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success);
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Test Form */
+        .test-form {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 15px;
+            transition: all 200ms;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: "Space Mono", monospace;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
+        .form-hint {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            margin-top: 6px;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: "Space Mono", monospace;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 200ms;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* Status Message */
+        .status-message {
+            margin-top: 24px;
+            padding: 16px;
+            border-radius: 8px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            background: var(--accent-light);
+            color: var(--accent-dark);
+            border-left: 4px solid var(--accent);
+        }
+
+        .status-message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid var(--error);
+        }
+
+        .status-message.info {
+            background: #eff6ff;
+            color: #1e40af;
+            border-left: 4px solid var(--info);
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin-top: 40px;
+        }
+
+        .info-item h3 {
+            font-family: "Space Mono", monospace;
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: var(--accent);
+        }
+
+        .info-item p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 40px 0;
+            text-align: center;
+            color: var(--text-tertiary);
+            margin-top: 60px;
+        }
+
+        footer a {
+            color: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .section-title {
+                font-size: 24px;
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+
+            .test-form {
+                padding: 24px;
+            }
+
+            button {
+                padding: 12px 20px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">notify<span>bot</span></div>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-badges">
+                    <span class="badge">MCP Protocol</span>
+                    <span class="badge dark">Telegram Bot</span>
+                    <span class="badge">Tailscale VPN</span>
+                </div>
+                <h1>Notifiche Telegram<br>con Guardrail</h1>
+                <p>Server MCP per inviare messaggi Telegram dal tuo home server. Rate limit, deduplicazione, e dry-run mode di default. Zero rischi.</p>
+            </div>
+        </section>
+
+        <!-- Dashboard -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Status Server</h2>
+                <div class="dashboard">
+                    <div class="stat-card status">
+                        <div class="stat-label">
+                            <span class="status-indicator"></span>Server Status
+                        </div>
+                        <div class="stat-value">Online</div>
+                        <div class="stat-detail">Tailscale: 100.64.x.x</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Messaggi Oggi</div>
+                        <div class="stat-value">12</div>
+                        <div class="stat-detail">Rate limit: 5/min</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">DRY_RUN Mode</div>
+                        <div class="stat-value">ON</div>
+                        <div class="stat-detail">Nessun API call reale</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Dedup Window</div>
+                        <div class="stat-value">5m</div>
+                        <div class="stat-detail">Evita duplicati</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Test Form -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Prova Il Server</h2>
+                <div class="test-form">
+                    <form id="testForm">
+                        <div class="form-group">
+                            <label for="message">Messaggio</label>
+                            <textarea 
+                                id="message" 
+                                placeholder="Scrivi un messaggio da testare..." 
+                                required
+                            ></textarea>
+                            <div class="form-hint">Max 4096 caratteri • Verrà inviato in dry-run (simulato)</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="token">Token MCP (opzionale)</label>
+                            <input 
+                                type="password" 
+                                id="token" 
+                                placeholder="Bearer token per autenticazione"
+                            />
+                            <div class="form-hint">Usa il token dal tuo .env se disponibile</div>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="submit" class="btn-primary">Invia Test</button>
+                            <button type="reset" class="btn-secondary">Cancella</button>
+                        </div>
+
+                        <div class="status-message" id="statusMessage"></div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Info -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Features</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <h3>🛡️ Guardrail</h3>
+                        <p>Rate limit a 5 messaggi/minuto, deduplicazione automatica, e DRY_RUN mode di default. Nessun rischio di invii accidentali.</p>
+                    </div>
+                    <div class="info-item">
+                        <h3>🌐 Tailscale</h3>
+                        <p>Accessibile solo dalla tua rete privata Tailscale. Zero esposizione a internet pubblico.</p>
+                    </div>
+                    <div class="info-item">
+                        <h3>🔐 Autenticazione</h3>
+                        <p>Bearer token authentication. Il server non fa mai polling o riceve comandi. Solo outbound.</p>
+                    </div>
+                    <div class="info-item">
+                        <h3>📊 Logging Sicuro</h3>
+                        <p>Log non contengono mai token, chat ID, o testo completo. Solo event tracking.</p>
+                    </div>
+                    <div class="info-item">
+                        <h3>🚀 MCP Protocol</h3>
+                        <p>Standard Model Context Protocol. Funziona direttamente con Claude Code e altri client MCP.</p>
+                    </div>
+                    <div class="info-item">
+                        <h3>📦 Deploy</h3>
+                        <p>Systemd service, Docker container, o Docker Compose. Setup automatico via bash script.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Links -->
+        <section class="section">
+            <div class="container" style="text-align: center;">
+                <h2 class="section-title">Risorse</h2>
+                <div style="display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;">
+                    <a href="https://github.com/MATEJ081/notify-bot" style="padding: 12px 24px; border: 1px solid var(--border); border-radius: 8px; display: inline-block;">GitHub Repository</a>
+                    <a href="https://github.com/MATEJ081/notify-bot/blob/main/README.md" style="padding: 12px 24px; border: 1px solid var(--border); border-radius: 8px; display: inline-block;">README</a>
+                    <a href="https://github.com/MATEJ081/notify-bot/blob/main/MCP_SETUP.md" style="padding: 12px 24px; border: 1px solid var(--border); border-radius: 8px; display: inline-block;">MCP Setup Guide</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>notify-bot • MCP Server for Telegram • Built with ❤️ for home servers</p>
+            <p style="margin-top: 12px; font-size: 14px;">© 2026 • <a href="#">Privacy</a> • <a href="#">License (MIT)</a></p>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        function updateThemeToggle() {
+            const theme = html.getAttribute('data-theme');
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeToggle();
+        });
+
+        // Restore theme from localStorage
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            html.setAttribute('data-theme', savedTheme);
+        }
+        updateThemeToggle();
+
+        // Form handling
+        const testForm = document.getElementById('testForm');
+        const statusMessage = document.getElementById('statusMessage');
+        const messageInput = document.getElementById('message');
+
+        testForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const message = messageInput.value.trim();
+            const token = document.getElementById('token').value.trim();
+
+            if (!message) {
+                showStatus('Scrivi un messaggio', 'error');
+                return;
+            }
+
+            const submitBtn = testForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+
+            try {
+                // Simula invio (in realtà per demo solo mostriamo il risultato)
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                showStatus(
+                    `✓ Messaggio inviato in dry-run mode!\n"${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`,
+                    'success'
+                );
+
+                messageInput.value = '';
+            } catch (err) {
+                showStatus(`Errore: ${err.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message show ${type}`;
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusMessage.classList.remove('show');
+                }, 4000);
+            }
+        }
+    </script>
+</body>
+</html>
