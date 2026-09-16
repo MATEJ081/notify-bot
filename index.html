@@ -3,54 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>notify-bot — Telegram MCP</title>
+    <title>Home Server — notify-bot Dashboard</title>
     <style>
         :root {
             --bg-primary: #ffffff;
             --bg-secondary: #f5f5f7;
-            --bg-tertiary: #ffffff;
             --text-primary: #1d1d1f;
             --text-secondary: #86868b;
             --accent: #0a84ff;
             --accent-light: #e8f0ff;
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.5);
         }
 
         @media (prefers-color-scheme: dark) {
             :root:not([data-theme="light"]) {
                 --bg-primary: #000000;
                 --bg-secondary: #1d1d1f;
-                --bg-tertiary: #242426;
                 --text-primary: #f5f5f7;
                 --text-secondary: #86868b;
-                --accent: #0a84ff;
-                --accent-light: #1e3a5f;
-                --glass-bg: rgba(255, 255, 255, 0.1);
-                --glass-border: rgba(255, 255, 255, 0.15);
             }
         }
 
         :root[data-theme="dark"] {
             --bg-primary: #000000;
             --bg-secondary: #1d1d1f;
-            --bg-tertiary: #242426;
             --text-primary: #f5f5f7;
             --text-secondary: #86868b;
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.15);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
             color: var(--text-primary);
@@ -62,10 +43,7 @@
         /* Login Screen */
         .login-screen {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: var(--bg-primary);
             display: flex;
             flex-direction: column;
@@ -75,14 +53,9 @@
             animation: fadeIn 0.3s ease-out;
         }
 
-        .login-screen.hidden {
-            display: none;
-        }
+        .login-screen.hidden { display: none; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .login-container {
             width: 100%;
@@ -90,22 +63,9 @@
             padding: 48px 32px;
         }
 
-        .login-logo {
-            text-align: center;
-            margin-bottom: 48px;
-        }
-
-        .login-logo h1 {
-            font-size: 32px;
-            font-weight: 700;
-            letter-spacing: -1px;
-            margin-bottom: 8px;
-        }
-
-        .login-logo p {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
+        .login-logo { text-align: center; margin-bottom: 48px; }
+        .login-logo h1 { font-size: 32px; font-weight: 700; letter-spacing: -1px; margin-bottom: 8px; }
+        .login-logo p { color: var(--text-secondary); font-size: 14px; }
 
         .login-form {
             display: flex;
@@ -123,16 +83,6 @@
             font-size: 15px;
             font-family: inherit;
             transition: all 200ms;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) .login-form input {
-                border-color: #424245;
-            }
-        }
-
-        :root[data-theme="dark"] .login-form input {
-            border-color: #424245;
         }
 
         .login-form input:focus {
@@ -158,35 +108,20 @@
             box-shadow: 0 4px 16px rgba(10, 132, 255, 0.3);
         }
 
-        .login-form button:active {
-            transform: scale(0.98);
-        }
-
         .login-error {
             color: #ff3b30;
             font-size: 13px;
             text-align: center;
             display: none;
             margin-bottom: 12px;
-            animation: shake 0.4s ease-out;
         }
 
-        .login-error.show {
-            display: block;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
+        .login-error.show { display: block; }
 
         /* Admin Bar */
         .admin-bar {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 44px;
             background: var(--bg-secondary);
             border-bottom: 1px solid #d5d5d7;
@@ -197,24 +132,9 @@
             z-index: 99;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) .admin-bar {
-                border-bottom-color: #424245;
-            }
-        }
+        .admin-bar.show { display: flex; }
 
-        :root[data-theme="dark"] .admin-bar {
-            border-bottom-color: #424245;
-        }
-
-        .admin-bar.show {
-            display: flex;
-        }
-
-        .admin-bar small {
-            color: var(--text-secondary);
-            font-size: 13px;
-        }
+        .admin-bar small { color: var(--text-secondary); font-size: 13px; }
 
         .admin-bar button {
             padding: 6px 12px;
@@ -224,17 +144,6 @@
             color: var(--text-primary);
             font-size: 13px;
             cursor: pointer;
-            transition: all 150ms;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) .admin-bar button {
-                border-color: #424245;
-            }
-        }
-
-        :root[data-theme="dark"] .admin-bar button {
-            border-color: #424245;
         }
 
         .admin-bar button:hover {
@@ -243,16 +152,8 @@
             color: var(--accent);
         }
 
-        /* Main Layout */
-        main {
-            padding-top: 44px;
-        }
+        main { padding-top: 44px; }
 
-        .page-hidden .admin-bar ~ main {
-            display: none;
-        }
-
-        /* Header */
         header {
             position: sticky;
             top: 44px;
@@ -260,16 +161,6 @@
             border-bottom: 1px solid #d5d5d7;
             padding: 16px 24px;
             z-index: 10;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) header {
-                border-bottom-color: #424245;
-            }
-        }
-
-        :root[data-theme="dark"] header {
-            border-bottom-color: #424245;
         }
 
         .header-content {
@@ -280,19 +171,11 @@
             align-items: center;
         }
 
-        .logo {
-            font-size: 18px;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-        }
-
-        .logo .accent {
-            color: var(--accent);
-        }
+        .logo { font-size: 18px; font-weight: 600; letter-spacing: -0.5px; }
+        .logo .accent { color: var(--accent); }
 
         .theme-toggle {
-            width: 36px;
-            height: 36px;
+            width: 36px; height: 36px;
             border: 1px solid #d5d5d7;
             background: var(--bg-secondary);
             border-radius: 8px;
@@ -302,16 +185,6 @@
             justify-content: center;
             font-size: 16px;
             transition: all 150ms;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) .theme-toggle {
-                border-color: #424245;
-            }
-        }
-
-        :root[data-theme="dark"] .theme-toggle {
-            border-color: #424245;
         }
 
         .theme-toggle:hover {
@@ -380,34 +253,13 @@
             border: 1px solid #d5d5d7;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) .btn-secondary {
-                border-color: #424245;
-            }
-        }
-
-        :root[data-theme="dark"] .btn-secondary {
-            border-color: #424245;
-        }
-
         .btn-secondary:hover {
             background: #f5f5f7;
         }
 
-        /* Section */
-        .section {
-            padding: 80px 24px;
-            border-top: 1px solid #d5d5d7;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) .section {
-                border-top-color: #424245;
-            }
-        }
-
-        :root[data-theme="dark"] .section {
-            border-top-color: #424245;
+        /* Dashboard */
+        .dashboard-section {
+            padding: 48px 24px;
         }
 
         .section-title {
@@ -418,11 +270,11 @@
             text-align: center;
         }
 
-        /* Grid */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 24px;
+            margin-bottom: 48px;
         }
 
         .card {
@@ -431,16 +283,6 @@
             border-radius: 12px;
             padding: 32px;
             transition: all 200ms;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) .card {
-                border-color: #424245;
-            }
-        }
-
-        :root[data-theme="dark"] .card {
-            border-color: #424245;
         }
 
         .card:hover {
@@ -454,58 +296,45 @@
             margin-bottom: 12px;
         }
 
+        .card h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .card p {
             color: var(--text-secondary);
             font-size: 15px;
             line-height: 1.6;
         }
 
-        /* Footer */
-        footer {
-            border-top: 1px solid #d5d5d7;
-            padding: 48px 24px;
-            text-align: center;
+        #activityLog {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #d5d5d7;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.8;
             color: var(--text-secondary);
-            font-size: 14px;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) footer {
-                border-top-color: #424245;
-            }
+        .section-divider {
+            margin-top: 48px;
+            border-top: 1px solid #d5d5d7;
+            padding-top: 48px;
         }
 
-        :root[data-theme="dark"] footer {
-            border-top-color: #424245;
-        }
-
-        /* Responsive */
         @media (max-width: 640px) {
-            .hero {
-                padding: 48px 24px;
-            }
-
-            .hero h1 {
-                font-size: 32px;
-                letter-spacing: -1px;
-            }
-
-            .hero p {
-                font-size: 16px;
-            }
-
-            .section {
-                padding: 48px 24px;
-            }
-
-            .section-title {
-                font-size: 28px;
-                margin-bottom: 32px;
-            }
-
-            .login-container {
-                padding: 32px 24px;
-            }
+            .login-container { padding: 32px 24px; }
+            .hero { padding: 48px 24px; }
+            .hero h1 { font-size: 32px; }
+            .section-title { font-size: 28px; margin-bottom: 32px; }
         }
     </style>
 </head>
@@ -514,25 +343,13 @@
     <div class="login-screen" id="loginScreen">
         <div class="login-container">
             <div class="login-logo">
-                <h1>notify<span class="accent">bot</span></h1>
-                <p>Notifiche Telegram con Guardrail</p>
+                <h1>Home<span class="accent">Server</span></h1>
+                <p>Accedi al dashboard</p>
             </div>
             <div class="login-error" id="loginError"></div>
             <form class="login-form" id="loginForm">
-                <input
-                    type="email"
-                    id="loginEmail"
-                    placeholder="Email"
-                    required
-                    autocomplete="email"
-                />
-                <input
-                    type="password"
-                    id="loginPassword"
-                    placeholder="Password"
-                    required
-                    autocomplete="current-password"
-                />
+                <input type="email" id="loginEmail" placeholder="Email" required autocomplete="email" />
+                <input type="password" id="loginPassword" placeholder="Password" required autocomplete="current-password" />
                 <button type="submit">Accedi</button>
             </form>
         </div>
@@ -546,14 +363,14 @@
 
     <header>
         <div class="header-content">
-            <div class="logo">notify<span class="accent">bot</span></div>
+            <div class="logo">Home<span class="accent">Server</span></div>
             <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
         </div>
     </header>
 
     <main>
         <!-- Hero -->
-        <section class="hero">
+        <section class="hero" id="heroSection">
             <div class="container">
                 <h1>Home Server</h1>
                 <p>Piattaforma centralizzata per automazioni, notifiche, e server MCP. Tailscale, Claude Code, e strumenti di automazione in un unico posto.</p>
@@ -564,46 +381,77 @@
             </div>
         </section>
 
-        <!-- Features -->
-        <section class="section">
+        <!-- Dashboard -->
+        <section class="dashboard-section" id="dashboardSection" style="display: none;">
             <div class="container">
-                <h2 class="section-title">Features</h2>
+                <h2 class="section-title">Dashboard</h2>
+
                 <div class="grid">
                     <div class="card">
-                        <h3>🛡️ Guardrail</h3>
-                        <p>Rate limit a 5 messaggi/minuto, deduplicazione automatica, e DRY_RUN mode di default.</p>
+                        <h3>🟢 Server Status</h3>
+                        <div style="margin-top: 16px;">
+                            <div style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">Online</div>
+                            <div style="font-size: 13px; color: var(--text-secondary);">Ultimo check: ora</div>
+                        </div>
                     </div>
                     <div class="card">
-                        <h3>🌐 Tailscale</h3>
-                        <p>Accessibile solo dalla tua rete privata Tailscale. Zero esposizione a internet pubblico.</p>
+                        <h3>⏱️ Uptime</h3>
+                        <div style="margin-top: 16px;">
+                            <div style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">45d 8h</div>
+                            <div style="font-size: 13px; color: var(--text-secondary);">99.8% affidabilità</div>
+                        </div>
                     </div>
                     <div class="card">
-                        <h3>🔐 Autenticazione</h3>
-                        <p>Bearer token authentication. Il server non fa mai polling. Solo outbound.</p>
+                        <h3>🚀 Services</h3>
+                        <div style="margin-top: 16px;">
+                            <div style="font-size: 13px; margin-bottom: 6px;">✅ notify-bot: Running</div>
+                            <div style="font-size: 13px; margin-bottom: 6px;">✅ Tailscale: Connected</div>
+                            <div style="font-size: 13px;">✅ Claude Code: Ready</div>
+                        </div>
                     </div>
                     <div class="card">
-                        <h3>📊 Logging Sicuro</h3>
-                        <p>Log non contengono mai token, chat ID, o testo completo. Solo event tracking.</p>
+                        <h3>📊 Activity</h3>
+                        <div style="margin-top: 16px;">
+                            <div style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">12</div>
+                            <div style="font-size: 13px; color: var(--text-secondary);">Messaggi oggi</div>
+                        </div>
                     </div>
-                    <div class="card">
-                        <h3>🚀 MCP Protocol</h3>
-                        <p>Standard Model Context Protocol. Funziona direttamente con Claude Code.</p>
-                    </div>
-                    <div class="card">
-                        <h3>📦 Deploy</h3>
-                        <p>Systemd service, Docker container, o Docker Compose. Setup automatico.</p>
+                </div>
+
+                <!-- Activity Log -->
+                <div class="section-divider">
+                    <h3 style="font-size: 24px; font-weight: 600; margin-bottom: 24px;">Activity Log</h3>
+                    <div id="activityLog"></div>
+                </div>
+
+                <!-- Configuration -->
+                <div class="section-divider">
+                    <h3 style="font-size: 24px; font-weight: 600; margin-bottom: 24px;">Configuration</h3>
+                    <div class="grid">
+                        <div class="card">
+                            <h4>DRY_RUN Mode</h4>
+                            <div style="font-size: 18px; font-weight: 700;">ON</div>
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">Nessun API call reale</div>
+                        </div>
+                        <div class="card">
+                            <h4>Rate Limit</h4>
+                            <div style="font-size: 18px; font-weight: 700;">5/min</div>
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">Messaggi per minuto</div>
+                        </div>
+                        <div class="card">
+                            <h4>Dedup Window</h4>
+                            <div style="font-size: 18px; font-weight: 700;">5m</div>
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">Evita duplicati</div>
+                        </div>
+                        <div class="card">
+                            <h4>Tailscale IP</h4>
+                            <div style="font-size: 18px; font-weight: 700;">100.64.x.x</div>
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">Rete privata</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
-
-        <!-- Footer -->
-        <footer>
-            <div class="container">
-                <p>notify-bot • MCP Server for Telegram • Built with ❤️</p>
-                <p style="margin-top: 12px; opacity: 0.6;">© 2026</p>
-            </div>
-        </footer>
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
@@ -616,36 +464,28 @@
 
         const AUTH_CONFIG = {
             MAX_ATTEMPTS: 3,
-            LOCKOUT_DURATION: 5 * 60 * 1000, // 5 minutes
-            SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
-            INACTIVITY_CHECK: 60 * 1000 // Check every 1 minute
+            LOCKOUT_DURATION: 5 * 60 * 1000,
+            SESSION_TIMEOUT: 30 * 60 * 1000,
+            INACTIVITY_CHECK: 60 * 1000
         };
 
         let sessionTimeout;
         let lastActivityTime = Date.now();
 
-        // ===== RATE LIMITING =====
         function checkRateLimit(email) {
             const key = `login_attempts_${email}`;
             const lockoutKey = `login_lockout_${email}`;
-
             const lockoutTime = localStorage.getItem(lockoutKey);
+
             if (lockoutTime && Date.now() < parseInt(lockoutTime)) {
-                return {
-                    allowed: false,
-                    message: 'Troppi tentativi. Riprova tra 5 minuti.'
-                };
+                return { allowed: false, message: 'Troppi tentativi. Riprova tra 5 minuti.' };
             }
 
             const attempts = parseInt(localStorage.getItem(key) || '0');
-
             if (attempts >= AUTH_CONFIG.MAX_ATTEMPTS) {
                 localStorage.setItem(lockoutKey, Date.now() + AUTH_CONFIG.LOCKOUT_DURATION);
                 localStorage.removeItem(key);
-                return {
-                    allowed: false,
-                    message: 'Account bloccato per 5 minuti. Riprova dopo.'
-                };
+                return { allowed: false, message: 'Account bloccato per 5 minuti.' };
             }
 
             return { allowed: true };
@@ -655,22 +495,19 @@
             const key = `login_attempts_${email}`;
             const attempts = parseInt(localStorage.getItem(key) || '0');
             localStorage.setItem(key, attempts + 1);
-            auditLog(`Login fallito: ${email} (tentativo ${attempts + 1}/${AUTH_CONFIG.MAX_ATTEMPTS})`);
+            auditLog(`Login fallito: ${email}`);
         }
 
         function clearFailedAttempts(email) {
-            const key = `login_attempts_${email}`;
-            localStorage.removeItem(key);
+            localStorage.removeItem(`login_attempts_${email}`);
             localStorage.removeItem(`login_lockout_${email}`);
         }
 
-        // ===== SESSION MANAGEMENT =====
         function startSessionTimeout() {
             clearTimeout(sessionTimeout);
-
             sessionTimeout = setTimeout(() => {
                 if (Date.now() - lastActivityTime > AUTH_CONFIG.SESSION_TIMEOUT) {
-                    auditLog(`Session timeout automatico per: ${localStorage.getItem('notifybot_session')}`);
+                    auditLog(`Session timeout: ${localStorage.getItem('notifybot_session')}`);
                     logout();
                 }
             }, AUTH_CONFIG.INACTIVITY_CHECK);
@@ -681,32 +518,39 @@
             startSessionTimeout();
         }
 
-        // ===== AUDIT LOGGING =====
         function auditLog(message) {
             const timestamp = new Date().toISOString();
             const logEntry = `[${timestamp}] ${message}`;
-
-            // Store last 20 logs in localStorage
             const logs = JSON.parse(localStorage.getItem('notifybot_audit_logs') || '[]');
             logs.push(logEntry);
             if (logs.length > 20) logs.shift();
             localStorage.setItem('notifybot_audit_logs', JSON.stringify(logs));
-
             console.log(logEntry);
         }
 
-        // ===== AUTH FUNCTIONS =====
+        function updateDashboard() {
+            const logs = JSON.parse(localStorage.getItem('notifybot_audit_logs') || '[]');
+            const activityLog = document.getElementById('activityLog');
+
+            if (logs.length === 0) {
+                activityLog.innerHTML = '<div style="opacity: 0.5;">No activity yet</div>';
+            } else {
+                activityLog.innerHTML = logs.reverse().map(log => `<div>${log}</div>`).join('');
+            }
+        }
+
         function checkAuth() {
             const session = localStorage.getItem('notifybot_session');
             const sessionTime = localStorage.getItem('notifybot_session_time');
             const loginScreen = document.getElementById('loginScreen');
             const adminBar = document.getElementById('adminBar');
             const userEmail = document.getElementById('userEmail');
+            const heroSection = document.getElementById('heroSection');
+            const dashboardSection = document.getElementById('dashboardSection');
 
             if (session && sessionTime) {
                 const age = Date.now() - parseInt(sessionTime);
                 if (age > AUTH_CONFIG.SESSION_TIMEOUT) {
-                    // Session expired
                     logout();
                     return;
                 }
@@ -714,14 +558,21 @@
                 loginScreen.classList.add('hidden');
                 adminBar.classList.add('show');
                 userEmail.textContent = session;
+
+                heroSection.style.display = 'none';
+                dashboardSection.style.display = 'block';
+
+                updateDashboard();
                 startSessionTimeout();
 
-                // Add global activity listener
                 document.addEventListener('mousemove', recordActivity, { once: true });
                 document.addEventListener('keypress', recordActivity, { once: true });
             } else {
                 loginScreen.classList.remove('hidden');
                 adminBar.classList.remove('show');
+
+                heroSection.style.display = 'block';
+                dashboardSection.style.display = 'none';
             }
         }
 
@@ -734,16 +585,14 @@
             checkAuth();
         }
 
-        // ===== LOGIN FORM HANDLER =====
         const loginForm = document.getElementById('loginForm');
         const loginError = document.getElementById('loginError');
 
-        loginForm.addEventListener('submit', async (e) => {
+        loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
 
-            // Rate limiting
             const rateLimitCheck = checkRateLimit(email);
             if (!rateLimitCheck.allowed) {
                 loginError.textContent = rateLimitCheck.message;
@@ -751,7 +600,6 @@
                 return;
             }
 
-            // Verify credentials
             if (AUTHORIZED_USERS[email] && AUTHORIZED_USERS[email] === password) {
                 clearFailedAttempts(email);
                 localStorage.setItem('notifybot_session', email);
@@ -769,7 +617,6 @@
             }
         });
 
-        // Initialize auth on page load
         checkAuth();
 
         // ===== THEME TOGGLE =====
