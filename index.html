@@ -408,6 +408,113 @@
             color: var(--accent);
         }
 
+        /* Login Screen */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .login-screen.hidden {
+            display: none;
+        }
+
+        .login-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 48px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .login-container h2 {
+            font-family: "Space Mono", monospace;
+            font-size: 28px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
+        .login-form button {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: "Space Mono", monospace;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 200ms;
+        }
+
+        .login-form button:hover {
+            background: var(--accent-dark);
+        }
+
+        .login-error {
+            color: var(--error);
+            font-size: 14px;
+            margin-bottom: 16px;
+            text-align: center;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        /* Admin Bar */
+        .admin-bar {
+            background: var(--info);
+            color: white;
+            padding: 12px;
+            text-align: right;
+            display: none;
+        }
+
+        .admin-bar.show {
+            display: block;
+        }
+
+        .admin-bar button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .admin-bar button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
         /* Responsive */
         @media (max-width: 640px) {
             .hero h1 {
@@ -434,10 +541,45 @@
                 padding: 12px 20px;
                 font-size: 13px;
             }
+
+            .login-container {
+                padding: 32px 24px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-container">
+            <h2>notify<span style="color: var(--accent);">bot</span></h2>
+            <div class="login-error" id="loginError"></div>
+            <form class="login-form" id="loginForm">
+                <input
+                    type="email"
+                    id="loginEmail"
+                    placeholder="Email"
+                    required
+                    autocomplete="email"
+                />
+                <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Password"
+                    required
+                    autocomplete="current-password"
+                />
+                <button type="submit">Accedi</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Bar -->
+    <div class="admin-bar" id="adminBar">
+        <small>Loggato come <span id="userEmail"></span></small>
+        <button onclick="logout()">Logout</button>
+    </div>
+
     <header>
         <div class="container">
             <div class="logo">notify<span>bot</span></div>
@@ -581,7 +723,62 @@
     </footer>
 
     <script>
-        // Theme toggle
+        // ===== AUTHENTICATION =====
+        const AUTHORIZED_USERS = {
+            'matej08@gmail.com': 'Monachilegge.1',
+            'lucreziabogaroatgmail.com': 'Monachilegge.1'
+        };
+
+        function checkAuth() {
+            const session = localStorage.getItem('notifybot_session');
+            const loginScreen = document.getElementById('loginScreen');
+            const adminBar = document.getElementById('adminBar');
+            const userEmail = document.getElementById('userEmail');
+
+            if (session) {
+                // Already logged in
+                loginScreen.classList.add('hidden');
+                adminBar.classList.add('show');
+                userEmail.textContent = session;
+            } else {
+                // Not logged in
+                loginScreen.classList.remove('hidden');
+                adminBar.classList.remove('show');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('notifybot_session');
+            checkAuth();
+        }
+
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (AUTHORIZED_USERS[email] && AUTHORIZED_USERS[email] === password) {
+                // Correct credentials
+                localStorage.setItem('notifybot_session', email);
+                checkAuth();
+                loginForm.reset();
+            } else {
+                // Wrong credentials
+                loginError.textContent = 'Email o password errata';
+                loginError.classList.add('show');
+                setTimeout(() => {
+                    loginError.classList.remove('show');
+                }, 3000);
+            }
+        });
+
+        // Check auth on page load
+        checkAuth();
+
+        // ===== THEME TOGGLE =====
         const themeToggle = document.getElementById('themeToggle');
         const html = document.documentElement;
 
