@@ -606,23 +606,119 @@
         </footer>
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
     <script>
-        // ===== AUTHENTICATION =====
+        // ===== AUTHENTICATION WITH SECURITY =====
         const AUTHORIZED_USERS = {
             'matej08@gmail.com': 'Monachilegge.1',
             'lucreziabogaroatgmail.com': 'Monachilegge.1'
         };
 
+        const AUTH_CONFIG = {
+            MAX_ATTEMPTS: 3,
+            LOCKOUT_DURATION: 5 * 60 * 1000, // 5 minutes
+            SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
+            INACTIVITY_CHECK: 60 * 1000 // Check every 1 minute
+        };
+
+        let sessionTimeout;
+        let lastActivityTime = Date.now();
+
+        // ===== RATE LIMITING =====
+        function checkRateLimit(email) {
+            const key = `login_attempts_${email}`;
+            const lockoutKey = `login_lockout_${email}`;
+
+            const lockoutTime = localStorage.getItem(lockoutKey);
+            if (lockoutTime && Date.now() < parseInt(lockoutTime)) {
+                return {
+                    allowed: false,
+                    message: 'Troppi tentativi. Riprova tra 5 minuti.'
+                };
+            }
+
+            const attempts = parseInt(localStorage.getItem(key) || '0');
+
+            if (attempts >= AUTH_CONFIG.MAX_ATTEMPTS) {
+                localStorage.setItem(lockoutKey, Date.now() + AUTH_CONFIG.LOCKOUT_DURATION);
+                localStorage.removeItem(key);
+                return {
+                    allowed: false,
+                    message: 'Account bloccato per 5 minuti. Riprova dopo.'
+                };
+            }
+
+            return { allowed: true };
+        }
+
+        function recordFailedAttempt(email) {
+            const key = `login_attempts_${email}`;
+            const attempts = parseInt(localStorage.getItem(key) || '0');
+            localStorage.setItem(key, attempts + 1);
+            auditLog(`Login fallito: ${email} (tentativo ${attempts + 1}/${AUTH_CONFIG.MAX_ATTEMPTS})`);
+        }
+
+        function clearFailedAttempts(email) {
+            const key = `login_attempts_${email}`;
+            localStorage.removeItem(key);
+            localStorage.removeItem(`login_lockout_${email}`);
+        }
+
+        // ===== SESSION MANAGEMENT =====
+        function startSessionTimeout() {
+            clearTimeout(sessionTimeout);
+
+            sessionTimeout = setTimeout(() => {
+                if (Date.now() - lastActivityTime > AUTH_CONFIG.SESSION_TIMEOUT) {
+                    auditLog(`Session timeout automatico per: ${localStorage.getItem('notifybot_session')}`);
+                    logout();
+                }
+            }, AUTH_CONFIG.INACTIVITY_CHECK);
+        }
+
+        function recordActivity() {
+            lastActivityTime = Date.now();
+            startSessionTimeout();
+        }
+
+        // ===== AUDIT LOGGING =====
+        function auditLog(message) {
+            const timestamp = new Date().toISOString();
+            const logEntry = `[${timestamp}] ${message}`;
+
+            // Store last 20 logs in localStorage
+            const logs = JSON.parse(localStorage.getItem('notifybot_audit_logs') || '[]');
+            logs.push(logEntry);
+            if (logs.length > 20) logs.shift();
+            localStorage.setItem('notifybot_audit_logs', JSON.stringify(logs));
+
+            console.log(logEntry);
+        }
+
+        // ===== AUTH FUNCTIONS =====
         function checkAuth() {
             const session = localStorage.getItem('notifybot_session');
+            const sessionTime = localStorage.getItem('notifybot_session_time');
             const loginScreen = document.getElementById('loginScreen');
             const adminBar = document.getElementById('adminBar');
             const userEmail = document.getElementById('userEmail');
 
-            if (session) {
+            if (session && sessionTime) {
+                const age = Date.now() - parseInt(sessionTime);
+                if (age > AUTH_CONFIG.SESSION_TIMEOUT) {
+                    // Session expired
+                    logout();
+                    return;
+                }
+
                 loginScreen.classList.add('hidden');
                 adminBar.classList.add('show');
                 userEmail.textContent = session;
+                startSessionTimeout();
+
+                // Add global activity listener
+                document.addEventListener('mousemove', recordActivity, { once: true });
+                document.addEventListener('keypress', recordActivity, { once: true });
             } else {
                 loginScreen.classList.remove('hidden');
                 adminBar.classList.remove('show');
@@ -630,23 +726,41 @@
         }
 
         function logout() {
+            const email = localStorage.getItem('notifybot_session');
+            auditLog(`Logout: ${email}`);
             localStorage.removeItem('notifybot_session');
+            localStorage.removeItem('notifybot_session_time');
+            clearTimeout(sessionTimeout);
             checkAuth();
         }
 
+        // ===== LOGIN FORM HANDLER =====
         const loginForm = document.getElementById('loginForm');
         const loginError = document.getElementById('loginError');
 
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
 
+            // Rate limiting
+            const rateLimitCheck = checkRateLimit(email);
+            if (!rateLimitCheck.allowed) {
+                loginError.textContent = rateLimitCheck.message;
+                loginError.classList.add('show');
+                return;
+            }
+
+            // Verify credentials
             if (AUTHORIZED_USERS[email] && AUTHORIZED_USERS[email] === password) {
+                clearFailedAttempts(email);
                 localStorage.setItem('notifybot_session', email);
+                localStorage.setItem('notifybot_session_time', Date.now());
+                auditLog(`Login successful: ${email}`);
                 checkAuth();
                 loginForm.reset();
             } else {
+                recordFailedAttempt(email);
                 loginError.textContent = 'Email o password errata';
                 loginError.classList.add('show');
                 setTimeout(() => {
@@ -655,6 +769,7 @@
             }
         });
 
+        // Initialize auth on page load
         checkAuth();
 
         // ===== THEME TOGGLE =====
